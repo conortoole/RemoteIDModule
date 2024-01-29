@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "MVP1",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"bluetooth.h": "c"
+		}
+	}
+}

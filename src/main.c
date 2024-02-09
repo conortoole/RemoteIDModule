@@ -1,64 +1,50 @@
 #include <zephyr.h>
-#include <device.h>
-#include <devicetree.h>
-#include <drivers/uart.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/bluetooth.h>
+#include <sys/printk.h>
+#include <bluetooth/conn.h>
 
-#include "BluetoothMod.h"
-#include "GPSMod.h"
+// Define the advertising data
+static uint8_t mfg_data[] = { 0xff, 0xff, 0x00 };
 
-#define SLEEP_TIME_MS   500
-
-uint8_t test[] = {        		
-    't',                     
-    'e',                     
-    's',                     
-    't'             
+static const struct bt_data ad[] = {
+	BT_DATA(BT_DATA_MANUFACTURER_DATA, mfg_data, 3),
 };
-
-void Bluetooth_signal(struct Bluetooth* bluetooth) {
-    int err = 0;
-
-    printk("Starting Beacon\n");
-
-    // Enable Bluetooth
-    err = bt_enable(Bluetooth_ready(bluetooth, err));
-    if (err) {
-        printk("Bluetooth init failed (err %d)\n", err);
-    }
-}
 
 void main(void)
 {
-    printk("hello world\n");
-    struct GPS gps;
-    struct Bluetooth bluetooth;
-    //bool devices_connected = true;
+    int err;
+    struct bt_le_ext_adv *adv;
+    struct bt_le_adv_param adv_param;
+    struct bt_le_ext_adv_start_param adv_start_param;
 
-    // Initialize GPS module
-    GPS_init(&gps);
-    printk("gps configured\n");
-    // Initialize Bluetooth module
-    Bluetooth_init(&bluetooth);
-    // Wait until both devices are connected
-    // while (!devices_connected) {
-    //     devices_connected = Bluetooth_is_connected(&bluetooth) && GPS_is_connected(&gps);
-    //     printk("waiting for devices to connect\n");
-    // }
+    printk("Starting Bluetooth Beacon...\n");
 
-    bool loop_sequence = true;
+    // Initialize advertising parameters
+    memset(&adv_start_param, 0, sizeof(adv_start_param));
+    adv_start_param.timeout = 0; // No timeout
+    adv_start_param.num_events = 0; // Advertise indefinitely
 
-    //Main loop
-    while (loop_sequence) {
-        printk("top of loop\n");
-        // Update GPS data
-        //GPS_update_data(&gps);
-        // Update Bluetooth packet data with GPS data
-        Bluetooth_update_adata(&bluetooth, test); 
-        printk("a Data updated\n");
-        // Send Bluetooth signal
-        //Bluetooth_signal(&bluetooth); //FAILS TO START ADVERTISING
-        printk("end of loop\n");
-        // Sleep for a specified time
-        k_msleep(SLEEP_TIME_MS);
+    // Create the extended advertiser instance
+    err = bt_le_ext_adv_create(&adv_param, NULL, &adv);
+    if (err) {
+        printk("Advertiser creation failed (%d)\n", err);
+        return;
     }
-}
+
+    // Set the advertising data
+    err = bt_le_ext_adv_set_data(adv, ad, ARRAY_SIZE(ad), NULL, 0);
+    if (err) {
+        printk("Failed to set advertising data (%d)\n", err);
+        return;
+    }
+
+    // Start advertising
+    err = bt_le_ext_adv_start(adv, &adv_start_param);
+    if (err) {
+        printk("Failed to start advertising (%d)\n", err);
+        return;
+    }
+
+    printk("Advertising started.\n");
+};

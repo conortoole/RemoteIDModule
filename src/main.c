@@ -75,7 +75,7 @@ void main(void) {
 
     // Call update_advertising_data() periodically
     while (1) {
-        k_sleep(K_MSEC(300)); // Sleep for 0.3 seconds
+        k_sleep(K_MSEC(5)); // Sleep for  seconds
         update_advertising_data(); // Update advertising data
     }
 }

@@ -8,8 +8,9 @@
 // Define the advertising data
 static uint8_t mfg_data[] = {
     /* Initial advertising data */
-    '!', '!', '!', '!', '!', '-', '0', 
-    '!', '!', '!', '!', '!', '!', '!',
+    '!',                    // Msg Type -- Version
+    '!', '!', '!', '!',     // UniqueID
+    '-', '0', '!', '!', '!', '!', '!', '!', '!',
     '!', '!', '!', '!', '!', '!', '!',
     '!', '!', '!', '!', '!', '!', '!',
     '!'
@@ -17,6 +18,9 @@ static uint8_t mfg_data[] = {
 
 static const struct bt_data ad[] = {
     BT_DATA(BT_DATA_MANUFACTURER_DATA, mfg_data, sizeof(mfg_data)),
+    BT_DATA(BT_DATA_NAME_COMPLETE, "MyDeviceName", sizeof("MyDeviceName") - 1),
+    BT_DATA(BT_DATA_FLAGS, &(mfg_data[13]), sizeof(mfg_data[13])),
+    BT_DATA(BT_DATA_UUID16_ALL, &(mfg_data[18]), sizeof(mfg_data) - 18),
 };
     
 static uint8_t counter = 0;

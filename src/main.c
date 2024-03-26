@@ -4,6 +4,7 @@
 #include <sys/printk.h>
 #include <bluetooth/conn.h>
 #include <bluetooth/gap.h>
+#include <drivers/hwinfo.h>
 
 // Define the advertising data
 static uint8_t mfg_data[] = {
@@ -40,6 +41,22 @@ void update_advertising_data(void) {
     bt_le_adv_update_data(ad, ARRAY_SIZE(ad), NULL, 0);
 }
 
+void print_cpu_serial_number(void) {
+    uint8_t device_id[16]; // Buffer to store the device ID
+    ssize_t len = hwinfo_get_device_id(device_id, sizeof(device_id));
+
+    if (len < 0) {
+        printk("Failed to get device ID (%d)\n", len);
+        return;
+    }
+
+    printk("CPU Serial Number: ");
+    for (ssize_t i = 0; i < len; i++) {
+        printk("%02x", device_id[i]);
+    }
+    printk("\n");
+}
+
 void main(void) {
     int err;
     struct bt_le_adv_param adv_param = {
@@ -47,6 +64,9 @@ void main(void) {
         .interval_min = BT_GAP_ADV_FAST_INT_MIN_2,
         .interval_max = BT_GAP_ADV_FAST_INT_MAX_2,
     };
+
+    // Print the CPU serial number
+    print_cpu_serial_number();
 
     printk("Starting Bluetooth Beacon...\n");
 

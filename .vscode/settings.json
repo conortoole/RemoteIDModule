@@ -1,5 +1,7 @@
 {
     "files.associations": {
         "hci.h": "c"
-    }
+    },
+    "cmake.configureOnOpen": true,
+    "platformio-ide.useBuiltinPIOCore": true
 }
